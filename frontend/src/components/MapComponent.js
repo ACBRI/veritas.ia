@@ -16,7 +16,7 @@ const MapComponent = () => {
   });
 
   return (
-    <MapContainer center={position} zoom={13} style={{ height: '100vh', width: '100%' }}>
+    <MapContainer center={position} zoom={13} style={{ height: '100vh', width: '100%' }} zoomControl={false}>
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -26,6 +26,13 @@ const MapComponent = () => {
           Ejemplo de ubicación.
         </Popup>
       </Marker>
+      {/* Personalizar la posición del control de zoom */}
+      <div className="leaflet-bottom leaflet-right">
+        <div className="leaflet-control-zoom leaflet-bar leaflet-control" style={{ borderRadius: '50px' }}>
+          <a className="leaflet-control-zoom-in" href="#" title="Zoom in" style={{ borderRadius: '50px 50px 0 0' }}>+</a>
+          <a className="leaflet-control-zoom-out" href="#" title="Zoom out" style={{ borderRadius: '0 0 50px 50px' }}>−</a>
+        </div>
+      </div>
     </MapContainer>
   );
 };
