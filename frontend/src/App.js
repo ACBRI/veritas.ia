@@ -1,5 +1,6 @@
 import React from 'react';
 import MapComponent from './components/MapComponent';
+import Button from './components/Button/Button';
 import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 
 const theme = createTheme({
@@ -22,6 +23,7 @@ function App() {
       <CssBaseline />
       <Box sx={{ position: 'relative', height: '100vh', width: '100%' }}>
         <MapComponent />
+        <Button onClick={() => alert('Hola!')}>Haz clic aquí</Button>
       </Box>
     </ThemeProvider>
   );
