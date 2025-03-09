@@ -12,55 +12,8 @@ import './ReportForm.css';
  * Formulario completo para enviar reportes
  */
 const ReportForm = ({ open, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    offenseType: '',
-  });
-
-  const [errors, setErrors] = useState({});
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-    
-    // Limpiar error cuando el usuario comienza a escribir
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: '',
-      });
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.title.trim()) {
-      newErrors.title = 'El título es requerido';
-    }
-    
-    if (!formData.description.trim()) {
-      newErrors.description = 'La descripción es requerida';
-    }
-    
-    if (!formData.category) {
-      newErrors.category = 'Selecciona una categoría';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      onSubmit(formData);
-    }
+  const handleOffenseSelect = (offenseId) => {
+    onSubmit({ offenseType: offenseId });
   };
 
 
@@ -89,49 +42,12 @@ const ReportForm = ({ open, onSubmit, onCancel }) => {
         </Box>
         
         <Typography variant="subtitle1" id="report-form-description" gutterBottom>
-          Selecciona el tipo de delito electoral y completa los detalles
+          Selecciona el tipo de delito electoral que deseas reportar
         </Typography>
 
-        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-          Tipo de Delito Electoral
-        </Typography>
-        <ElectoralOffenseGrid />
+        <ElectoralOffenseGrid onSelect={handleOffenseSelect} />
         
-        <Divider sx={{ my: 3 }} />
-        
-        <Typography variant="h6" gutterBottom>
-          Detalles del Reporte
-        </Typography>
-
-        <form onSubmit={handleSubmit} className="report-form">
-        <FormField
-          type="text"
-          name="title"
-          label="Título"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Ingresa un título descriptivo"
-          required
-          error={!!errors.title}
-          helperText={errors.title}
-        />
-        
-        <FormField
-          type="textarea"
-          name="description"
-          label="Descripción"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Describe el reporte con detalle"
-          rows={4}
-          required
-          error={!!errors.description}
-          helperText={errors.description}
-        />
-        
-
-        
-        <Box className="form-actions">
+        <Box className="form-actions" sx={{ mt: 3 }}>
           <Button 
             variant="outlined" 
             onClick={onCancel}
@@ -139,15 +55,7 @@ const ReportForm = ({ open, onSubmit, onCancel }) => {
           >
             Cancelar
           </Button>
-          <Button 
-            type="submit" 
-            variant="contained"
-            color="primary"
-          >
-            Enviar Reporte
-          </Button>
         </Box>
-        </form>
       </Box>
     </Modal>
   );

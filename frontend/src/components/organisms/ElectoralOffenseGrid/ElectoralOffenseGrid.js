@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Grid, Paper, Typography } from '@mui/material';
 import BallotIcon from '@mui/icons-material/Ballot';
 import BlockIcon from '@mui/icons-material/Block';
@@ -16,7 +17,7 @@ import './ElectoralOffenseGrid.css';
  * Componente ElectoralOffenseGrid organismo
  * Muestra una cuadrícula de delitos electorales con sus iconos representativos
  */
-const ElectoralOffenseGrid = () => {
+const ElectoralOffenseGrid = ({ onSelect }) => {
   const offenses = [
     {
       id: 'multiple-vote',
@@ -84,7 +85,11 @@ const ElectoralOffenseGrid = () => {
     <Grid container spacing={2} className="electoral-offense-grid">
       {offenses.map((offense) => (
         <Grid item xs={6} sm={4} md={3} key={offense.id}>
-          <Paper className="offense-card" elevation={2}>
+          <Paper 
+            className="offense-card" 
+            elevation={2}
+            onClick={() => onSelect(offense.id)}
+          >
             <div className="offense-icon">
               {offense.icon}
             </div>
@@ -99,6 +104,10 @@ const ElectoralOffenseGrid = () => {
       ))}
     </Grid>
   );
+};
+
+ElectoralOffenseGrid.propTypes = {
+  onSelect: PropTypes.func.isRequired,
 };
 
 export default ElectoralOffenseGrid;
