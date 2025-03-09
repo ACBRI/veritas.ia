@@ -1,5 +1,4 @@
 import React from 'react';
-import ReportForm from './components/ReportForm';
 import MapComponent from './components/MapComponent';
 import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 
@@ -23,9 +22,6 @@ function App() {
       <CssBaseline />
       <Box sx={{ position: 'relative', height: '100vh', width: '100%' }}>
         <MapComponent />
-        <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 1000 }}>
-          <ReportForm />
-        </Box>
       </Box>
     </ThemeProvider>
   );
