@@ -5,6 +5,7 @@ import L from 'leaflet';
 import LocateButton from './LocateButton/LocateButton';
 import ZoomControls from './ZoomControls/ZoomControls';
 import MarkerWithPopup from './MarkerWithPopup/MarkerWithPopup';
+import FloatingReportButton from './FloatingReportButton/FloatingReportButton';
 
 const MapComponent = () => {
   const [userLocation, setUserLocation] = useState(null);
@@ -32,6 +33,10 @@ const MapComponent = () => {
     }
   };
 
+  const handleReportSubmit = (reportDetails) => {
+    console.log('Reporte enviado:', reportDetails);
+  };
+
   const icon = L.icon({
     iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
     iconSize: [25, 41],
@@ -57,8 +62,11 @@ const MapComponent = () => {
         <MarkerWithPopup position={userLocation} icon={icon} popupText="¡Estás aquí!" />
       )}
       <div className="leaflet-bottom leaflet-right">
+        <FloatingReportButton onReportSubmit={handleReportSubmit} />
+        <div style={{ marginTop: '70px' }}> 
         <LocateButton onClick={handleLocateUser} />
         <ZoomControls />
+      </div>
       </div>
     </MapContainer>
   );
