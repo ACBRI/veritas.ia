@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import FormField from '../../molecules/FormField/FormField';
 import Button from '../../atoms/Button/Button';
 import Card from '../../molecules/Card/Card';

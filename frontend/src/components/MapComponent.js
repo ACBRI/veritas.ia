@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { useMap } from '../context/MapContext';
 import MapLayout from './templates/MapLayout/MapLayout';
-import MapControls from './organisms/MapControls/MapControls';
+import MapControlsContainer from './organisms/MapControls/MapControlsContainer';
 import MapMarker from './molecules/MapMarker/MapMarker';
 import ReportForm from './organisms/ReportForm/ReportForm';
 import './MapComponent.css';
@@ -16,9 +16,6 @@ const MapComponent = () => {
     userLocation,
     defaultIcon,
     initializeMap,
-    flyToUserLocation,
-    zoomIn,
-    zoomOut,
   } = useMap();
 
   const [showReportForm, setShowReportForm] = React.useState(false);
@@ -60,10 +57,7 @@ const MapComponent = () => {
         zoom={7}
         onMapReady={initializeMap}
         mapControls={
-          <MapControls
-            onLocateUser={flyToUserLocation}
-            onZoomIn={zoomIn}
-            onZoomOut={zoomOut}
+          <MapControlsContainer 
             disableLocate={!userLocation}
           />
         }

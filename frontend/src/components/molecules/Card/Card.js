@@ -12,7 +12,7 @@ const Card = ({
   subtitle,
   children,
   actions,
-  elevation = 2,
+  elevation = 0,
   variant = 'outlined',
   className = '',
   ...props

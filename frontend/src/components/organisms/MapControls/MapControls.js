@@ -28,6 +28,7 @@ const MapControls = ({
           tooltip="Mi ubicación"
           disabled={disableLocate}
           className="locate-button"
+          data-testid="locate-button"
         />
       </Box>
       
@@ -38,6 +39,7 @@ const MapControls = ({
           tooltip="Acercar"
           disabled={disableZoomIn}
           className="zoom-button"
+          data-testid="zoom-in-button"
         />
         <IconButton
           icon={<RemoveIcon />}
@@ -45,6 +47,7 @@ const MapControls = ({
           tooltip="Alejar"
           disabled={disableZoomOut}
           className="zoom-button"
+          data-testid="zoom-out-button"
         />
       </Box>
     </Box>

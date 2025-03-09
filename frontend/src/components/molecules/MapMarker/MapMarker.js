@@ -14,14 +14,28 @@ const MapMarker = ({
   onClick,
   eventHandlers = {},
 }) => {
+  // Preparamos los manejadores de eventos correctamente
+  const handlers = {};
+  
+  // Solo añadimos el evento click si onClick es una función
+  if (typeof onClick === 'function') {
+    handlers.click = onClick;
+  }
+  
+  // Añadimos el resto de manejadores de eventos, verificando que sean funciones
+  Object.keys(eventHandlers).forEach(eventName => {
+    if (typeof eventHandlers[eventName] === 'function') {
+      handlers[eventName] = eventHandlers[eventName];
+    } else {
+      console.warn(`Manejador de evento '${eventName}' no es una función válida`);
+    }
+  });
+
   return (
     <Marker
       position={position}
       icon={icon}
-      eventHandlers={{
-        click: onClick,
-        ...eventHandlers,
-      }}
+      eventHandlers={handlers}
     >
       {popupContent && (
         <Popup className="map-marker-popup">{popupContent}</Popup>

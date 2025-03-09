@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormControl, FormLabel, FormHelperText } from '@mui/material';
+import { FormControl, FormHelperText } from '@mui/material';
 import Input from '../../atoms/Input/Input';
 import Select from '../../atoms/Select/Select';
 import TextArea from '../../atoms/TextArea/TextArea';
