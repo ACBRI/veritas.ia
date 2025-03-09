@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@mui/material';
+import { Box, Modal, Typography, IconButton, Divider } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import FormField from '../../molecules/FormField/FormField';
 import Button from '../../atoms/Button/Button';
-import Card from '../../molecules/Card/Card';
+import ElectoralOffenseGrid from '../ElectoralOffenseGrid/ElectoralOffenseGrid';
 import './ReportForm.css';
 
 /**
  * Componente ReportForm organismo
  * Formulario completo para enviar reportes
  */
-const ReportForm = ({ onSubmit, onCancel }) => {
+const ReportForm = ({ open, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: '',
+    offenseType: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -62,21 +63,47 @@ const ReportForm = ({ onSubmit, onCancel }) => {
     }
   };
 
-  const categoryOptions = [
-    { value: '', label: 'Selecciona una categoría' },
-    { value: 'incidente', label: 'Incidente' },
-    { value: 'sugerencia', label: 'Sugerencia' },
-    { value: 'denuncia', label: 'Denuncia' },
-    { value: 'otro', label: 'Otro' },
-  ];
+
 
   return (
-    <Card
-      title="Nuevo Reporte"
-      subtitle="Completa el formulario para enviar un reporte"
-      className="report-form-card"
+    <Modal
+      open={open}
+      onClose={onCancel}
+      aria-labelledby="report-form-title"
+      aria-describedby="report-form-description"
+      className="report-form-modal"
     >
-      <form onSubmit={handleSubmit} className="report-form">
+      <Box className="report-form-modal-content">
+        <Box className="report-form-header">
+          <Typography variant="h5" component="h2" id="report-form-title">
+            Nuevo Reporte
+          </Typography>
+          <IconButton
+            aria-label="cerrar"
+            onClick={onCancel}
+            size="small"
+            className="close-button"
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        
+        <Typography variant="subtitle1" id="report-form-description" gutterBottom>
+          Selecciona el tipo de delito electoral y completa los detalles
+        </Typography>
+
+        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+          Tipo de Delito Electoral
+        </Typography>
+        <ElectoralOffenseGrid />
+        
+        <Divider sx={{ my: 3 }} />
+        
+        <Typography variant="h6" gutterBottom>
+          Detalles del Reporte
+        </Typography>
+
+        <form onSubmit={handleSubmit} className="report-form">
         <FormField
           type="text"
           name="title"
@@ -102,17 +129,7 @@ const ReportForm = ({ onSubmit, onCancel }) => {
           helperText={errors.description}
         />
         
-        <FormField
-          type="select"
-          name="category"
-          label="Categoría"
-          value={formData.category}
-          onChange={handleChange}
-          options={categoryOptions}
-          required
-          error={!!errors.category}
-          helperText={errors.category}
-        />
+
         
         <Box className="form-actions">
           <Button 
@@ -130,12 +147,14 @@ const ReportForm = ({ onSubmit, onCancel }) => {
             Enviar Reporte
           </Button>
         </Box>
-      </form>
-    </Card>
+        </form>
+      </Box>
+    </Modal>
   );
 };
 
 ReportForm.propTypes = {
+  open: PropTypes.bool.isRequired,
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
 };

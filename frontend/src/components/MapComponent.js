@@ -61,14 +61,7 @@ const MapComponent = () => {
             disableLocate={!userLocation}
           />
         }
-        floatingContent={showReportForm ? (
-          <ReportForm
-            onSubmit={handleReportSubmit}
-            onCancel={handleReportCancel}
-          />
-        ) : (
-          renderReportButton()
-        )}
+        floatingContent={renderReportButton()}
       >
         {userLocation && (
           <MapMarker
@@ -78,6 +71,12 @@ const MapComponent = () => {
           />
         )}
       </MapLayout>
+
+      <ReportForm
+        open={showReportForm}
+        onSubmit={handleReportSubmit}
+        onCancel={handleReportCancel}
+      />
     </Box>
   );
 };

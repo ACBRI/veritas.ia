@@ -1,17 +1,46 @@
-.report-form-card {
-  max-width: 500px;
+.report-form-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-form-modal-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
   width: 100%;
+  max-width: 500px;
+  margin: 16px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  outline: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.report-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.close-button {
+  position: absolute;
+  right: 16px;
+  top: 16px;
 }
 
 .report-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 24px;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 16px;
-  margin-top: 16px;
+  margin-top: 24px;
 }
