@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Grid, Paper, Typography } from '@mui/material';
 import BallotIcon from '@mui/icons-material/Ballot';
@@ -9,7 +9,7 @@ import HelpIcon from '@mui/icons-material/Help';
 import WarningIcon from '@mui/icons-material/Warning';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import CampaignIcon from '@mui/icons-material/Campaign';
-import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
+import GppBadIcon from '@mui/icons-material/GppBad';
 import GroupsIcon from '@mui/icons-material/Groups';
 import './ElectoralOffenseGrid.css';
 
@@ -18,6 +18,12 @@ import './ElectoralOffenseGrid.css';
  * Muestra una cuadrícula de delitos electorales con sus iconos representativos
  */
 const ElectoralOffenseGrid = ({ onSelect }) => {
+  const [selectedId, setSelectedId] = useState(null);
+
+  const handleSelect = (offenseId) => {
+    setSelectedId(offenseId);
+    onSelect(offenseId);
+  };
   const offenses = [
     {
       id: 'multiple-vote',
@@ -69,7 +75,7 @@ const ElectoralOffenseGrid = ({ onSelect }) => {
     },
     {
       id: 'weapons',
-      icon: <DoNotDisturbIcon fontSize="large" />,
+      icon: <GppBadIcon fontSize="large" />,
       title: 'Portación de armas',
       description: 'Ingresar con armas a los lugares de votación'
     },
@@ -86,9 +92,9 @@ const ElectoralOffenseGrid = ({ onSelect }) => {
       {offenses.map((offense) => (
         <Grid item xs={6} sm={4} md={3} key={offense.id}>
           <Paper 
-            className="offense-card" 
-            elevation={2}
-            onClick={() => onSelect(offense.id)}
+            className={`offense-card ${selectedId === offense.id ? 'selected' : ''}`}
+            elevation={selectedId === offense.id ? 4 : 2}
+            onClick={() => handleSelect(offense.id)}
           >
             <div className="offense-icon">
               {offense.icon}

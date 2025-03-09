@@ -7,9 +7,9 @@
 .report-form-modal-content {
   background-color: white;
   border-radius: 8px;
-  padding: 24px;
-  width: 100%;
-  max-width: 500px;
+  padding: 20px;
+  width: 95%;
+  max-width: 800px;
   margin: 16px;
   max-height: 90vh;
   overflow-y: auto;
@@ -22,25 +22,49 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  padding-right: 32px;
 }
 
 .close-button {
   position: absolute;
-  right: 16px;
-  top: 16px;
+  right: 12px;
+  top: 12px;
 }
 
 .report-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 24px;
+  margin-top: 20px;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 16px;
-  margin-top: 24px;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 0 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .report-form-modal-content {
+    padding: 16px;
+    margin: 8px;
+    width: 98%;
+  }
+
+  .report-form-header {
+    margin-bottom: 8px;
+  }
+
+  .close-button {
+    right: 8px;
+    top: 8px;
+  }
+
+  .form-actions {
+    margin-top: 16px;
+  }
 }

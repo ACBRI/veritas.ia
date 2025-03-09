@@ -12,8 +12,15 @@ import './ReportForm.css';
  * Formulario completo para enviar reportes
  */
 const ReportForm = ({ open, onSubmit, onCancel }) => {
+  const [selectedOffense, setSelectedOffense] = useState(null);
   const handleOffenseSelect = (offenseId) => {
-    onSubmit({ offenseType: offenseId });
+    setSelectedOffense(offenseId);
+  };
+
+  const handleSubmit = () => {
+    if (selectedOffense) {
+      onSubmit({ offenseType: selectedOffense });
+    }
   };
 
 
@@ -54,6 +61,14 @@ const ReportForm = ({ open, onSubmit, onCancel }) => {
             color="secondary"
           >
             Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            color="primary"
+            disabled={!selectedOffense}
+          >
+            Reportar
           </Button>
         </Box>
       </Box>

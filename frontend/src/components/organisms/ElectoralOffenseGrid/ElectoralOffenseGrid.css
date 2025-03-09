@@ -1,9 +1,9 @@
 .electoral-offense-grid {
-  padding: 24px;
+  padding: 16px;
 }
 
 .offense-card {
-  padding: 16px;
+  padding: 12px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -18,19 +18,64 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
+.offense-card.selected {
+  background-color: #e3f2fd;
+  border: 2px solid #1976d2;
+  transform: translateY(-2px);
+}
+
+.offense-card.selected:hover {
+  transform: translateY(-4px);
+}
+
+.offense-card.selected .offense-icon {
+  transform: scale(1.1);
+}
+
 .offense-icon {
-  margin-bottom: 12px;
-  color: #1976d2; /* Color primario de Material-UI */
+  margin-bottom: 8px;
+  color: #1976d2;
 }
 
 .offense-title {
   font-weight: 600 !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 4px !important;
   line-height: 1.2 !important;
+  font-size: 0.9rem !important;
 }
 
 .offense-description {
   color: rgba(0, 0, 0, 0.6);
-  font-size: 0.875rem !important;
-  line-height: 1.4 !important;
+  font-size: 0.75rem !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 2.6em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .electoral-offense-grid {
+    padding: 8px;
+  }
+
+  .offense-card {
+    padding: 8px;
+  }
+
+  .offense-icon {
+    transform: scale(0.9);
+  }
+
+  .offense-title {
+    font-size: 0.8rem !important;
+  }
+
+  .offense-description {
+    font-size: 0.7rem !important;
+  }
 }
