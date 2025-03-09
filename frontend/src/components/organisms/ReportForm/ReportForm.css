@@ -1,0 +1,17 @@
+.report-form-card {
+  max-width: 500px;
+  width: 100%;
+}
+
+.report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 16px;
+}

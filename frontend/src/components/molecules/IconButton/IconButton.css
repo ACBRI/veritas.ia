@@ -1,0 +1,12 @@
+.custom-icon-button {
+  transition: all 0.3s ease;
+}
+
+.custom-icon-button:hover {
+  transform: scale(1.1);
+  background-color: rgba(51, 102, 204, 0.1);
+}
+
+.custom-icon-button:active {
+  transform: scale(1);
+}

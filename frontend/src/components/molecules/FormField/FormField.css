@@ -1,0 +1,13 @@
+.form-field {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.form-field .MuiFormLabel-root {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-field .MuiFormHelperText-root {
+  margin-top: 4px;
+}

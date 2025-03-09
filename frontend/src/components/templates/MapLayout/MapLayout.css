@@ -1,0 +1,18 @@
+.map-layout {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+}
+
+.map-layout-controls {
+  margin-right: 16px;
+  margin-bottom: 16px;
+  z-index: 1000;
+}
+
+.map-layout-floating-content {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+}

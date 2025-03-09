@@ -1,0 +1,15 @@
+.custom-select {
+  margin-bottom: 16px;
+}
+
+.custom-select .MuiOutlinedInput-root {
+  transition: all 0.3s ease;
+}
+
+.custom-select .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #3366cc;
+}
+
+.custom-select .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-width: 2px;
+}

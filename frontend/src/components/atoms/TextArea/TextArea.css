@@ -1,0 +1,15 @@
+.custom-textarea {
+  margin-bottom: 16px;
+}
+
+.custom-textarea .MuiOutlinedInput-root {
+  transition: all 0.3s ease;
+}
+
+.custom-textarea .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #3366cc;
+}
+
+.custom-textarea .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-width: 2px;
+}

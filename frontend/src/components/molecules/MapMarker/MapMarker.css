@@ -1,0 +1,13 @@
+.map-marker-popup .leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.map-marker-popup .leaflet-popup-content {
+  margin: 12px;
+  font-family: 'Roboto', sans-serif;
+}
+
+.map-marker-popup .leaflet-popup-tip {
+  background-color: white;
+}

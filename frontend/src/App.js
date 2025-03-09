@@ -1,30 +1,22 @@
 import React from 'react';
+import { Box, CssBaseline, ThemeProvider } from '@mui/material';
 import MapComponent from './components/MapComponent';
-import Button from './components/Button/Button';
-import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { MapProvider } from './context/MapContext';
+import theme from './styles/theme';
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#3366cc',
-    },
-    secondary: {
-      main: '#ffcc00',
-    },
-  },
-  typography: {
-    fontFamily: 'Roboto, sans-serif',
-  },
-});
-
+/**
+ * Componente principal de la aplicación
+ * Utiliza el patrón de Provider para proporcionar contexto a los componentes hijos
+ */
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ position: 'relative', height: '100vh', width: '100%' }}>
-        <MapComponent />
-        <Button onClick={() => alert('Hola!')}>Haz clic aquí</Button>
-      </Box>
+      <MapProvider>
+        <Box sx={{ position: 'relative', height: '100vh', width: '100%' }}>
+          <MapComponent />
+        </Box>
+      </MapProvider>
     </ThemeProvider>
   );
 }

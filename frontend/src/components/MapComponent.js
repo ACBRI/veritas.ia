@@ -1,78 +1,90 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import LocateButton from './LocateButton/LocateButton';
-import ZoomControls from './ZoomControls/ZoomControls';
-import MarkerWithPopup from './MarkerWithPopup/MarkerWithPopup';
-import FloatingReportButton from './FloatingReportButton/FloatingReportButton';
+import React from 'react';
+import { Box, Typography, Button } from '@mui/material';
+import { useMap } from '../context/MapContext';
+import MapLayout from './templates/MapLayout/MapLayout';
+import MapControls from './organisms/MapControls/MapControls';
+import MapMarker from './molecules/MapMarker/MapMarker';
+import ReportForm from './organisms/ReportForm/ReportForm';
+import './MapComponent.css';
 
+/**
+ * Componente MapComponent refactorizado usando arquitectura CDD
+ * Utiliza componentes atómicos, moleculares, organismos y plantillas
+ */
 const MapComponent = () => {
-  const [userLocation, setUserLocation] = useState(null);
-  const mapRef = useRef();
+  const {
+    userLocation,
+    defaultIcon,
+    initializeMap,
+    flyToUserLocation,
+    zoomIn,
+    zoomOut,
+  } = useMap();
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation([latitude, longitude]);
-        },
-        (error) => {
-          console.error('Error obteniendo la ubicación:', error);
-        }
-      );
-    } else {
-      console.error('Geolocalización no soportada por este navegador.');
-    }
-  }, []);
-
-  const handleLocateUser = () => {
-    if (userLocation && mapRef.current) {
-      mapRef.current.flyTo(userLocation, 13);
-    }
-  };
+  const [showReportForm, setShowReportForm] = React.useState(false);
 
   const handleReportSubmit = (reportDetails) => {
     console.log('Reporte enviado:', reportDetails);
+    setShowReportForm(false);
   };
 
-  const icon = L.icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-    shadowSize: [41, 41],
-  });
+  const handleReportCancel = () => {
+    setShowReportForm(false);
+  };
+
+  // Componente para el contenido del popup
+  const UserLocationPopup = () => (
+    <Box className="user-location-popup">
+      <Typography variant="body1" fontWeight="bold">
+        ¡Estás aquí!
+      </Typography>
+      <Typography variant="body2">Tu ubicación actual</Typography>
+    </Box>
+  );
+
+  // Componente para el botón de reporte
+  const renderReportButton = () => (
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={() => setShowReportForm(true)}
+    >
+      Reportar
+    </Button>
+  );
 
   return (
-    <MapContainer
-      center={[-1.8312, -78.1834]} // Coordenadas de Ecuador
-      zoom={7}
-      style={{ height: '100vh', width: '100%' }}
-      zoomControl={false}
-      ref={mapRef}
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      />
-      {userLocation && (
-        <MarkerWithPopup
-          position={userLocation}
-          icon={icon}
-          popupText="¡Estás aquí!"
-        />
-      )}
-      <div className="leaflet-bottom leaflet-right">
-        <FloatingReportButton onReportSubmit={handleReportSubmit} />
-        <div style={{ marginTop: '70px' }}>
-          <LocateButton onClick={handleLocateUser} />
-          <ZoomControls />
-        </div>
-      </div>
-    </MapContainer>
+    <Box className="map-component">
+      <MapLayout
+        center={[-1.8312, -78.1834]} // Coordenadas de Ecuador
+        zoom={7}
+        onMapReady={initializeMap}
+        mapControls={
+          <MapControls
+            onLocateUser={flyToUserLocation}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            disableLocate={!userLocation}
+          />
+        }
+        floatingContent={showReportForm ? (
+          <ReportForm
+            onSubmit={handleReportSubmit}
+            onCancel={handleReportCancel}
+          />
+        ) : (
+          renderReportButton()
+        )}
+      >
+        {userLocation && (
+          <MapMarker
+            position={userLocation}
+            icon={defaultIcon}
+            popupContent={<UserLocationPopup />}
+          />
+        )}
+      </MapLayout>
+    </Box>
   );
 };
 
