@@ -17,9 +17,23 @@ const IconButton = ({
   className = '',
   ...props
 }) => {
+  // Manejador de eventos mejorado
+  const handleClick = (event) => {
+    console.log('Botón clickeado');
+    // Prevenir comportamiento por defecto para evitar conflictos
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (onClick && typeof onClick === 'function') {
+      // Llamar al manejador de eventos proporcionado
+      onClick(event);
+    } else if (onClick) {
+      console.warn('onClick no es una función válida');
+    }
+  };
   const button = (
     <MuiIconButton
-      onClick={onClick}
+      onClick={handleClick}
       color={color}
       size={size}
       disabled={disabled}
@@ -31,9 +45,16 @@ const IconButton = ({
   );
 
   if (tooltip) {
+    // Si el botón está deshabilitado, envolvemos en un span para evitar el warning de MUI
     return (
       <Tooltip title={tooltip} arrow>
-        {button}
+        {disabled ? (
+          <span style={{ display: 'inline-block' }}>
+            {button}
+          </span>
+        ) : (
+          button
+        )}
       </Tooltip>
     );
   }

@@ -8,6 +8,10 @@
   margin-right: 16px;
   margin-bottom: 16px;
   z-index: 1000;
+  pointer-events: auto !important;
+  position: absolute !important;
+  bottom: 0;
+  right: 0;
 }
 
 .map-layout-floating-content {

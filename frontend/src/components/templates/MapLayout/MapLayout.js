@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@mui/material';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapLayout.css';
 
@@ -19,10 +19,51 @@ const MapLayout = ({
 }) => {
   const mapRef = useRef();
 
-  const handleMapReady = () => {
-    if (onMapReady && mapRef.current) {
-      onMapReady(mapRef.current);
-    }
+  // Componente interno para inicializar el mapa
+  // Este componente tiene acceso directo a la instancia del mapa a través del hook useMap
+  const MapInitializer = () => {
+    const map = useMap();
+    
+    useEffect(() => {
+      console.log('MapInitializer: Mapa disponible', map);
+      
+      if (!map) {
+        console.error('MapInitializer: La instancia del mapa no está disponible');
+        return;
+      }
+      
+      if (!onMapReady) {
+        console.warn('MapInitializer: No se proporcionó una función onMapReady');
+        return;
+      }
+      
+      try {
+        // Guardamos la referencia del mapa
+        mapRef.current = map;
+        
+        // Verificamos que el mapa tenga métodos esenciales
+        if (typeof map.flyTo !== 'function') {
+          console.error('MapInitializer: El método flyTo no está disponible');
+          return;
+        }
+        if (typeof map.zoomIn !== 'function') {
+          console.error('MapInitializer: El método zoomIn no está disponible');
+          return;
+        }
+        if (typeof map.zoomOut !== 'function') {
+          console.error('MapInitializer: El método zoomOut no está disponible');
+          return;
+        }
+        
+        // Llamamos a la función onMapReady con la instancia del mapa
+        onMapReady(map);
+        console.log('MapInitializer: Mapa inicializado exitosamente');
+      } catch (error) {
+        console.error('MapInitializer: Error al inicializar el mapa:', error);
+      }
+    }, [map]);
+    
+    return null; // Este componente no renderiza nada
   };
 
   return (
@@ -32,9 +73,9 @@ const MapLayout = ({
         zoom={zoom}
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
-        ref={mapRef}
-        whenReady={handleMapReady}
+        attributionControl={false}
       >
+        <MapInitializer />
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -42,7 +83,7 @@ const MapLayout = ({
         {children}
         
         {mapControls && (
-          <div className="map-layout-controls leaflet-bottom leaflet-right">
+          <div className="map-layout-controls leaflet-bottom leaflet-right leaflet-control">
             {mapControls}
           </div>
         )}
