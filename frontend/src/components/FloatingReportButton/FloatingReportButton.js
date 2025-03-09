@@ -1,11 +1,15 @@
-// src/components/FloatingReportButton/FloatingReportButton.js
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import Button from '../Button/Button';
 import './FloatingReportButton.css';
 
 const FloatingReportButton = ({ onReportSubmit }) => {
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [reportDetails, setReportDetails] = useState({ title: '', description: '', category: '' });
+  const [reportDetails, setReportDetails] = useState({
+    title: '',
+    description: '',
+    category: '',
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -50,6 +54,11 @@ const FloatingReportButton = ({ onReportSubmit }) => {
       )}
     </div>
   );
+};
+
+// Añadir validación de props
+FloatingReportButton.propTypes = {
+  onReportSubmit: PropTypes.func.isRequired,
 };
 
 export default FloatingReportButton;

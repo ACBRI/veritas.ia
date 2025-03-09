@@ -43,7 +43,7 @@ const MapComponent = () => {
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
     shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-    shadowSize: [41, 41]
+    shadowSize: [41, 41],
   });
 
   return (
@@ -59,14 +59,18 @@ const MapComponent = () => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       {userLocation && (
-        <MarkerWithPopup position={userLocation} icon={icon} popupText="¡Estás aquí!" />
+        <MarkerWithPopup
+          position={userLocation}
+          icon={icon}
+          popupText="¡Estás aquí!"
+        />
       )}
       <div className="leaflet-bottom leaflet-right">
         <FloatingReportButton onReportSubmit={handleReportSubmit} />
-        <div style={{ marginTop: '70px' }}> 
-        <LocateButton onClick={handleLocateUser} />
-        <ZoomControls />
-      </div>
+        <div style={{ marginTop: '70px' }}>
+          <LocateButton onClick={handleLocateUser} />
+          <ZoomControls />
+        </div>
       </div>
     </MapContainer>
   );

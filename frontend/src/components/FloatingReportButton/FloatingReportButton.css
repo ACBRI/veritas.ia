@@ -1,28 +1,28 @@
 .floating-report-button {
-    position: absolute;
-    top: 20px; /* Posición desde la parte superior */
-    right: 20px;
-    z-index: 1000;
-  }
-  
-  .floating-report-button form {
-    display: flex;
-    flex-direction: column;
-    background: white;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .floating-report-button input,
-  .floating-report-button textarea,
-  .floating-report-button select {
-    margin-bottom: 10px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .floating-report-button button {
-    margin-top: 10px;
-  }
+  position: absolute;
+  top: 20px; /* Posición desde la parte superior */
+  right: 20px;
+  z-index: 1000;
+}
+
+.floating-report-button form {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.floating-report-button input,
+.floating-report-button textarea,
+.floating-report-button select {
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.floating-report-button button {
+  margin-top: 10px;
+}
