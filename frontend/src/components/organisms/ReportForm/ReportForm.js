@@ -121,8 +121,9 @@ const ReportForm = ({ open, onSubmit, onCancel }) => {
             severity="info" 
             action={
               <Button
-                color="inherit"
+                color="primary"
                 size="small"
+                variant="text"
                 startIcon={<LocationOnIcon />}
                 onClick={requestUserLocation}
               >

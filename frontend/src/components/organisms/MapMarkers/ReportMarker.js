@@ -1,10 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Marker, Popup } from 'react-leaflet';
-import { Icon } from 'leaflet';
 import { Box, Typography, Badge } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { divIcon } from 'leaflet';
+
+// Importar los mismos iconos que usamos en ElectoralOffenseGrid
+import BallotIcon from '@mui/icons-material/Ballot';
+import BlockIcon from '@mui/icons-material/Block';
+import ContentCutIcon from '@mui/icons-material/ContentCut';
+import NoPhotographyIcon from '@mui/icons-material/NoPhotography';
+import HelpIcon from '@mui/icons-material/Help';
+import WarningIcon from '@mui/icons-material/Warning';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import GppBadIcon from '@mui/icons-material/GppBad';
 
 const ReportMarker = ({ report, userLocation }) => {
   // Calcular si el reporte es reciente (menos de 24 horas)
@@ -33,11 +45,50 @@ const ReportMarker = ({ report, userLocation }) => {
   const distance = getDistance();
   if (distance && distance > 5) return null;
 
-  // Crear el icono personalizado según el tipo de delito
-  const icon = new Icon({
-    iconUrl: `/icons/${report.offenseType}.svg`,
-    iconSize: [30, 30],
-    className: isRecent ? 'pulse-animation' : ''
+  // Mapeo de tipos de delitos a iconos
+  const offenseIcons = {
+    'multiple-vote': BallotIcon,
+    'weapons': GppBadIcon,
+    'voter-coercion': BlockIcon,
+    'ballot-destruction': ContentCutIcon,
+    'photography': NoPhotographyIcon,
+    'impersonation': VisibilityOffIcon,
+    'propaganda': CampaignIcon,
+    'intimidation': WarningIcon,
+    'other': HelpIcon
+  };
+
+  // Obtener el componente de icono correcto
+  const IconComponent = offenseIcons[report.offenseType] || HelpIcon;
+
+  // Crear el icono personalizado con el componente de Material-UI
+  const icon = divIcon({
+    html: renderToStaticMarkup(
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          backgroundColor: 'white',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+          border: '2px solid #1976d2'
+        }}
+        className={isRecent ? 'pulse-animation' : ''}
+      >
+        <IconComponent 
+          sx={{ 
+            color: '#1976d2',
+            fontSize: '24px'
+          }} 
+        />
+      </Box>
+    ),
+    className: '',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
   });
 
   return (
