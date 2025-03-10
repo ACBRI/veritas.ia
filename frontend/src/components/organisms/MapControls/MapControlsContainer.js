@@ -1,5 +1,4 @@
 import React from 'react';
-import { useMap as useLeafletMap } from 'react-leaflet';
 import { useMap } from '../../../context/MapContext';
 import MapControls from './MapControls';
 

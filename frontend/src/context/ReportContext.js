@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { ReportService } from '../services/api';
 
 const ReportContext = createContext();
 
@@ -19,7 +20,7 @@ const RECENT_REPORT_HOURS = 24;
 export const ReportProvider = ({ children }) => {
   // Estado para el ID de sesión anónimo
   const [sessionId, setSessionId] = useState(null);
-  
+
   // Estado para el último reporte y su tiempo
   const [lastReportTime, setLastReportTime] = useState(null);
 
@@ -30,11 +31,13 @@ export const ReportProvider = ({ children }) => {
   useEffect(() => {
     const cleanOldReports = () => {
       const now = new Date();
-      const thirtyDaysAgo = new Date(now - (REPORT_LIFETIME_DAYS * 24 * 60 * 60 * 1000));
-      
-      setReports(prevReports => 
-        prevReports.filter(report => 
-          new Date(report.timestamp) > thirtyDaysAgo
+      const thirtyDaysAgo = new Date(
+        now - REPORT_LIFETIME_DAYS * 24 * 60 * 60 * 1000
+      );
+
+      setReports((prevReports) =>
+        prevReports.filter(
+          (report) => new Date(report.timestamp) > thirtyDaysAgo
         )
       );
     };
@@ -44,7 +47,7 @@ export const ReportProvider = ({ children }) => {
     const interval = setInterval(cleanOldReports, 24 * 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
-  
+
   // Inicializar ID de sesión al cargar
   useEffect(() => {
     const storedSessionId = localStorage.getItem('reportSessionId');
@@ -65,7 +68,7 @@ export const ReportProvider = ({ children }) => {
   // Verificar si podemos hacer un nuevo reporte (timeout de 5 minutos)
   const canMakeNewReport = () => {
     if (!lastReportTime) return true;
-    
+
     const fiveMinutesInMs = 5 * 60 * 1000;
     const timeSinceLastReport = Date.now() - lastReportTime;
     return timeSinceLastReport >= fiveMinutesInMs;
@@ -75,8 +78,8 @@ export const ReportProvider = ({ children }) => {
   // Obtener reportes cercanos a una ubicación
   const getNearbyReports = (location, radiusKm = 5) => {
     if (!location) return [];
-    
-    return reports.filter(report => {
+
+    return reports.filter((report) => {
       const distance = calculateDistance(
         location[0],
         location[1],
@@ -90,19 +93,22 @@ export const ReportProvider = ({ children }) => {
   // Calcular distancia entre dos puntos
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // Radio de la Tierra en km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
   // Confirmar un reporte
   const confirmReport = (reportId) => {
-    setReports(prevReports =>
-      prevReports.map(report =>
+    setReports((prevReports) =>
+      prevReports.map((report) =>
         report.id === reportId
           ? { ...report, confirmations: (report.confirmations || 0) + 1 }
           : report
@@ -113,32 +119,53 @@ export const ReportProvider = ({ children }) => {
   const submitReport = async (reportData) => {
     // Verificar timeout
     if (!canMakeNewReport()) {
-      const minutesLeft = Math.ceil((5 * 60 * 1000 - (Date.now() - lastReportTime)) / 60000);
-      throw new Error(`Por favor espera ${minutesLeft} minutos antes de enviar otro reporte`);
+      const minutesLeft = Math.ceil(
+        (5 * 60 * 1000 - (Date.now() - lastReportTime)) / 60000
+      );
+      throw new Error(
+        `Por favor espera ${minutesLeft} minutos antes de enviar otro reporte`
+      );
     }
 
     // Verificar precisión de ubicación
     if (!validateLocationAccuracy(reportData.position)) {
-      throw new Error('La precisión de la ubicación no es suficiente. Por favor, intenta en un lugar con mejor señal GPS');
+      throw new Error(
+        'La precisión de la ubicación no es suficiente. Por favor, intenta en un lugar con mejor señal GPS'
+      );
     }
 
-    // Agregar datos adicionales al reporte
-    const enrichedReport = {
-      ...reportData,
-      id: uuidv4(),
-      sessionId,
-      timestamp: new Date().toISOString(),
-      confirmations: 0,
-      isRecent: true
-    };
+    try {
+      // Preparar los datos para el backend
+      const backendReport = {
+        offense_type_id: parseInt(reportData.offense_type_id),
+        coordinates: {
+          latitude: reportData.position.coords.latitude,
+          longitude: reportData.position.coords.longitude,
+          accuracy: reportData.position.coords.accuracy,
+        },
+      };
 
-    // Agregar el nuevo reporte a la lista
-    setReports(prevReports => [...prevReports, enrichedReport]);
+      // Enviar el reporte al backend usando nuestro servicio
+      const savedReport = await ReportService.createReport(backendReport);
 
-    // Actualizar tiempo del último reporte
-    setLastReportTime(Date.now());
+      // Agregar el reporte a la lista local
+      const enrichedReport = {
+        ...reportData,
+        id: savedReport.id,
+        sessionId,
+        timestamp: savedReport.created_at,
+        confirmations: 0,
+        isRecent: true,
+      };
 
-    return enrichedReport;
+      setReports((prevReports) => [...prevReports, enrichedReport]);
+      setLastReportTime(Date.now());
+
+      return enrichedReport;
+    } catch (error) {
+      console.error('Error al enviar reporte:', error);
+      throw error;
+    }
   };
 
   const value = {
@@ -148,12 +175,10 @@ export const ReportProvider = ({ children }) => {
     sessionId,
     reports,
     getNearbyReports,
-    confirmReport
+    confirmReport,
   };
 
   return (
-    <ReportContext.Provider value={value}>
-      {children}
-    </ReportContext.Provider>
+    <ReportContext.Provider value={value}>{children}</ReportContext.Provider>
   );
 };
