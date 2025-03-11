@@ -2,6 +2,8 @@ import React, { createContext, useState, useContext, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import L from 'leaflet';
 import useGeolocation from '../hooks/useGeolocation';
+// No usamos useReport directamente en este archivo, pero lo exportamos para conveniencia
+// de otros componentes que usen ambos contextos
 
 // Crear el contexto
 const MapContext = createContext();
@@ -18,6 +20,7 @@ export const MapProvider = ({ children }) => {
     error: locationError,
   } = useGeolocation();
   const [markers, setMarkers] = useState([]);
+  const [viewBounds, setViewBounds] = useState(null);
   // Configuración del icono por defecto
   const defaultIcon = L.icon({
     iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -27,6 +30,16 @@ export const MapProvider = ({ children }) => {
     shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
     shadowSize: [41, 41],
   });
+
+  // Función para actualizar los límites del mapa actual
+  const updateMapBounds = useCallback(() => {
+    if (map) {
+      const bounds = map.getBounds();
+      setViewBounds(bounds);
+      return bounds;
+    }
+    return null;
+  }, [map]);
 
   // Función para inicializar el mapa
   const initializeMap = useCallback((mapInstance) => {
@@ -53,6 +66,15 @@ export const MapProvider = ({ children }) => {
       console.log('Mapa inicializado correctamente');
       console.log(`Zoom inicial: ${mapInstance.getZoom()}`);
       console.log(`Centro inicial: [${mapInstance.getCenter().lat}, ${mapInstance.getCenter().lng}]`);
+      
+      // Configurar evento para actualizar los límites del mapa cuando cambie
+      mapInstance.on('moveend', () => {
+        const bounds = mapInstance.getBounds();
+        setViewBounds(bounds);
+      });
+      
+      // Inicializar los límites iniciales
+      setViewBounds(mapInstance.getBounds());
       
       // Probamos los métodos del mapa para verificar que funcionan
       console.log('Probando métodos del mapa:');
@@ -180,12 +202,14 @@ export const MapProvider = ({ children }) => {
     locationError,
     markers,
     defaultIcon,
+    viewBounds,
     initializeMap,
     flyToUserLocation,
     zoomIn,
     zoomOut,
     addMarker,
     removeMarker,
+    updateMapBounds,
   };
 
   return <MapContext.Provider value={value}>{children}</MapContext.Provider>;

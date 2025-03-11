@@ -63,13 +63,16 @@ const ReportForm = ({ open, onSubmit, onCancel }) => {
         return;
       }
 
+      // Preparar datos del reporte con el formato correcto
       const reportData = {
         offense_type_id: selectedOffense,
-        coordinates: {
-          latitude: reportLocation[0],
-          longitude: reportLocation[1],
-          accuracy: reportLocation[2] || 0,
-        },
+        position: {
+          coords: {
+            latitude: reportLocation[0],
+            longitude: reportLocation[1],
+            accuracy: reportLocation[2] || 0
+          }
+        }
       };
 
       const enrichedReport = await submitReport(reportData);

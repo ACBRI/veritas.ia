@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { ReportService } from '../services/api';
+import ReportService from '../services/ReportService';
+import WebSocketService from '../services/WebSocketService';
+import { API_BASE_URL } from '../config/api';
 
 const ReportContext = createContext();
 
@@ -26,6 +28,13 @@ export const ReportProvider = ({ children }) => {
 
   // Estado para la lista de reportes
   const [reports, setReports] = useState([]);
+  
+  // Estado para el WebSocket
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Referencia al servicio WebSocket para mantenerlo entre renders
+  const webSocketRef = useRef(null);
 
   // Limpiar reportes viejos cada vez que cambia la lista
   useEffect(() => {
@@ -74,8 +83,168 @@ export const ReportProvider = ({ children }) => {
     return timeSinceLastReport >= fiveMinutesInMs;
   };
 
-  // Función para enviar un reporte
-  // Obtener reportes cercanos a una ubicación
+  /**
+   * Obtiene reportes del backend basados en un bounding box
+   * @param {Object} bbox - Bounding box del mapa
+   * @param {string|number} offenseType - Tipo de delito (opcional)
+   * @returns {Promise<Array>} - Lista de reportes
+   */
+  const fetchReportsFromBackend = useCallback(async (bbox, offenseType = null) => {
+    try {
+      setIsLoading(true);
+      
+      // Se asume que ReportService normaliza el bbox y usa los servicios de normalización
+      const fetchedReports = await ReportService.getReports(bbox, offenseType);
+      
+      // Optimizar la actualización de los reportes existentes con los nuevos
+      // usando un solo cambio de estado para mejor rendimiento
+      setReports(prevReports => {
+        // Crear un mapa de reportes existentes para fácil referencia y búsqueda O(1)
+        const existingReportsMap = new Map(
+          prevReports.map(report => [report.id, report])
+        );
+        
+        // Integrar reportes nuevos y actualizar existentes
+        // Si un reporte ya existe, mantenemos ciertos datos locales importantes
+        fetchedReports.forEach(report => {
+          const existingReport = existingReportsMap.get(report.id);
+          if (existingReport) {
+            // Mantener datos locales importantes pero actualizar del backend
+            existingReportsMap.set(report.id, {
+              ...report,
+              // Preservar datos que podrían haberse actualizado localmente 
+              // y que el backend no proporciona
+              userHasConfirmed: existingReport.userHasConfirmed || false
+            });
+          } else {
+            // Nuevo reporte, agregar con valores por defecto para datos locales
+            existingReportsMap.set(report.id, {
+              ...report,
+              userHasConfirmed: false
+            });
+          }
+        });
+        
+        // Convertir mapa de vuelta a array
+        return Array.from(existingReportsMap.values());
+      });
+      
+      setIsLoading(false);
+      return fetchedReports;
+    } catch (error) {
+      console.error('Error al obtener reportes del backend:', error);
+      setIsLoading(false);
+      throw error;
+    }
+  }, []);
+
+  /**
+   * Procesa mensajes WebSocket y actualiza el estado de reportes
+   * @param {Object} data - Datos recibidos del WebSocket
+   */
+  const processWebSocketMessage = useCallback((data) => {
+    // Verificar que es un mensaje válido
+    if (!data || !data.type) return;
+    
+    console.log('WebSocket message received:', data.type);
+    
+    switch (data.type) {
+      case 'new_report':
+        // Normalizar datos recibidos a formato esperado por el frontend
+        if (data.data) {
+          // Asegurarse que el formato es correcto
+          const normalizedReport = ReportService.normalizeReportFromWebSocket(data.data);
+          
+          // Agregar nuevo reporte a la lista, si no existe
+          setReports(prevReports => {
+            // Verificar si el reporte ya existe
+            if (prevReports.some(r => r.id === normalizedReport.id)) {
+              return prevReports;
+            }
+            return [...prevReports, {
+              ...normalizedReport,
+              userHasConfirmed: false,
+              isRecent: true
+            }];
+          });
+        }
+        break;
+        
+      case 'confirmation_update':
+        // Actualizar confirmaciones de un reporte existente
+        if (data.data && data.data.report_id) {
+          setReports(prevReports => 
+            prevReports.map(report => 
+              report.id === data.data.report_id 
+                ? { 
+                    ...report, 
+                    confirmations: data.data.confirmation_count,
+                    // No resetear userHasConfirmed para mantener estado local
+                  }
+                : report
+            )
+          );
+        }
+        break;
+        
+      case 'report_expired':
+        // Remover reporte expirado o marcarlo como inactivo
+        if (data.data && data.data.report_id) {
+          setReports(prevReports => 
+            prevReports.map(report =>
+              report.id === data.data.report_id
+                ? { ...report, isActive: false, isExpired: true }
+                : report
+            )
+          );
+        }
+        break;
+        
+      case 'report_deleted':
+        // Remover reporte eliminado
+        if (data.data && data.data.report_id) {
+          setReports(prevReports => 
+            prevReports.filter(report => report.id !== data.data.report_id)
+          );
+        }
+        break;
+        
+      default:
+        console.log('Tipo de mensaje WebSocket no reconocido:', data.type);
+    }
+  }, []);
+
+  // Inicializar WebSocket
+  useEffect(() => {
+    const handleConnect = () => {
+      console.log('WebSocket conectado exitosamente');
+      setIsConnected(true);
+    };
+    
+    const handleDisconnect = () => {
+      console.log('WebSocket desconectado');
+      setIsConnected(false);
+    };
+    
+    // Crear servicio WebSocket
+    webSocketRef.current = new WebSocketService(
+      processWebSocketMessage,
+      handleConnect,
+      handleDisconnect
+    );
+    
+    // Conectar al WebSocket
+    webSocketRef.current.connect();
+    
+    // Limpiar al desmontar
+    return () => {
+      if (webSocketRef.current) {
+        webSocketRef.current.disconnect();
+      }
+    };
+  }, [processWebSocketMessage]);
+  
+  // Función para obtener reportes cercanos a una ubicación
   const getNearbyReports = (location, radiusKm = 5) => {
     if (!location) return [];
 
@@ -105,15 +274,63 @@ export const ReportProvider = ({ children }) => {
     return R * c;
   };
 
-  // Confirmar un reporte
-  const confirmReport = (reportId) => {
-    setReports((prevReports) =>
-      prevReports.map((report) =>
-        report.id === reportId
-          ? { ...report, confirmations: (report.confirmations || 0) + 1 }
-          : report
-      )
-    );
+  /**
+   * Confirma un reporte con protección contra confirmaciones duplicadas
+   * @param {string} reportId - ID del reporte a confirmar
+   * @returns {Promise<Object>} - Respuesta del backend
+   */
+  const confirmReport = async (reportId) => {
+    try {
+      // Verificar si el reporte existe en nuestra colección local
+      const reportToConfirm = reports.find(report => report.id === reportId);
+      if (!reportToConfirm) {
+        throw new Error('Reporte no encontrado');
+      }
+      
+      // Verificar si ya lo ha confirmado el usuario
+      if (reportToConfirm.userHasConfirmed) {
+        console.warn('El usuario ya ha confirmado este reporte');
+        return reportToConfirm;
+      }
+      
+      // Marcar como confirmado localmente primero (optimistic update)
+      setReports(prevReports =>
+        prevReports.map(report =>
+          report.id === reportId
+            ? {
+                ...report, 
+                confirmations: (report.confirmations || 0) + 1,
+                userHasConfirmed: true
+              }
+            : report
+        )
+      );
+      
+      // Llamar al servicio para confirmar el reporte en el backend
+      const result = await ReportService.confirmReport(reportId);
+      
+      // La actualización final de confirmaciones vendrá por WebSocket
+      // pero en caso de que el WebSocket falle, ya tenemos una actualización optimista
+      
+      return result;
+    } catch (error) {
+      console.error('Error al confirmar reporte:', error);
+      
+      // Revertir cambio optimista en caso de error
+      setReports(prevReports =>
+        prevReports.map(report =>
+          report.id === reportId && report.userHasConfirmed
+            ? {
+                ...report, 
+                confirmations: Math.max((report.confirmations || 1) - 1, 0),
+                userHasConfirmed: false
+              }
+            : report
+        )
+      );
+      
+      throw error;
+    }
   };
 
   const submitReport = async (reportData) => {
@@ -135,20 +352,15 @@ export const ReportProvider = ({ children }) => {
     }
 
     try {
-      // Preparar los datos para el backend
-      const backendReport = {
-        offense_type_id: parseInt(reportData.offense_type_id),
-        coordinates: {
-          latitude: reportData.position.coords.latitude,
-          longitude: reportData.position.coords.longitude,
-          accuracy: reportData.position.coords.accuracy,
-        },
-      };
+      // Usar el nuevo servicio para enviar el reporte
+      // El servicio se encargará de convertir el formato apropiadamente
+      const savedReport = await ReportService.createReport(reportData);
 
-      // Enviar el reporte al backend usando nuestro servicio
-      const savedReport = await ReportService.createReport(backendReport);
+      // Actualizar el tiempo del último reporte
+      setLastReportTime(Date.now());
 
-      // Agregar el reporte a la lista local
+      // La actualización del reporte real vendrá por WebSocket
+      // pero también lo agregamos localmente por si acaso
       const enrichedReport = {
         ...reportData,
         id: savedReport.id,
@@ -158,8 +370,13 @@ export const ReportProvider = ({ children }) => {
         isRecent: true,
       };
 
-      setReports((prevReports) => [...prevReports, enrichedReport]);
-      setLastReportTime(Date.now());
+      setReports((prevReports) => {
+        // Verificar si el reporte ya existe (puede haber llegado por WebSocket)
+        if (prevReports.some(r => r.id === savedReport.id)) {
+          return prevReports;
+        }
+        return [...prevReports, enrichedReport];
+      });
 
       return enrichedReport;
     } catch (error) {
@@ -176,6 +393,9 @@ export const ReportProvider = ({ children }) => {
     reports,
     getNearbyReports,
     confirmReport,
+    fetchReportsFromBackend,
+    isLoading,
+    isConnected,
   };
 
   return (
